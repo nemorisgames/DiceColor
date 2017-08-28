@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 34136572262ac450a98bf6b227d3ddc8
+timeCreated: 1485744557
+licenseType: Pro
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 0
+  fontName: FontAwesome
+  fontNames:
+  - FontAwesome
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 3
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

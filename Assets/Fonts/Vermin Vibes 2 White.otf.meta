@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 809433fa5ebf10d41bf786507a30a23e
+timeCreated: 1488670897
+licenseType: Pro
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 4
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Vermin Vibes 2 White
+  fontNames:
+  - Vermin Vibes 2 White
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
