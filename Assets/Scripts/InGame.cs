@@ -57,7 +57,7 @@ public class InGame : MonoBehaviour {
 	public UILabel hintIndicator;
 	int hintsAvailable = 3;
 
-	public TutorialVideo [] tutorialClips;
+	//public TutorialVideo [] tutorialClips;
 
 	public bool testing = false;
 	float diceSize;
@@ -234,7 +234,7 @@ public class InGame : MonoBehaviour {
 			//tutorial.transform.Find ("Sprite").GetComponent<UISprite> ().alpha = 1f;
 			//tutorial.transform.SendMessage ("PlayForward");
 			//tutorial.transform.Find ("Sprite").SendMessage ("PlayForward");
-			tutorialClips[(int.Parse (info [4]) - 1)].gameObject.SetActive(true);
+			//tutorialClips[(int.Parse (info [4]) - 1)].gameObject.SetActive(true);
 			//tutorialVideo.gameObject.SetActive(true);
 			//StartCoroutine(tutorialVideo.PlayClip(int.Parse (info [4]) - 1));
 			//Pause ();
