@@ -591,4 +591,87 @@ public static class GlobalVariables {
 
 	public static string Scene20Path = "1,3|2,3|1,2|1,1|2,1|3,1|3,2|4,2|3,3|2,4|3,4|4,4|1,5|1,6|4,5|5,5|5,6|6,5|6,4|6,3|5,3|5,2|6,2";
 
+
+    public enum CellColors {None, White, Yellow, Blue, Red, Green, Purple, Orange, GreenBlue, GreenYellow, PurpleBlue, PurpleRed, OrangeRed, OrangeYellow};
+    public static CellColors CellColor = CellColors.White;
+
+    public static CellColors getColor(CellColors colorA, CellColors colorB)
+    {
+
+        switch (colorA)
+        {
+            case CellColors.White:
+                switch (colorB)
+                {
+                    case CellColors.Yellow: return CellColors.Yellow;
+                    case CellColors.Blue: return CellColors.Blue;
+                    case CellColors.Red: return CellColors.Red;
+                    case CellColors.Green: return CellColors.Green;
+                    case CellColors.Purple: return CellColors.Purple;
+                    case CellColors.Orange: return CellColors.Orange;
+                    case CellColors.GreenBlue: return CellColors.GreenBlue;
+                    case CellColors.GreenYellow: return CellColors.GreenYellow;
+                    case CellColors.PurpleBlue: return CellColors.PurpleBlue;
+                    case CellColors.PurpleRed: return CellColors.PurpleRed;
+                    case CellColors.OrangeRed: return CellColors.OrangeRed;
+                    case CellColors.OrangeYellow: return CellColors.OrangeYellow;
+                }
+                break;
+            case CellColors.Yellow:
+                switch (colorB)
+                {
+                    case CellColors.White: return CellColors.Yellow;
+                    case CellColors.Blue: return CellColors.Green;
+                    case CellColors.Red: return CellColors.Orange;
+                    case CellColors.Green: return CellColors.GreenYellow;
+                    case CellColors.Orange: return CellColors.OrangeYellow;
+                }
+                break;
+            case CellColors.Blue:
+                switch (colorB)
+                {
+                    case CellColors.White: return CellColors.Blue;
+                    case CellColors.Yellow: return CellColors.Green;
+                    case CellColors.Red: return CellColors.Purple;
+                    case CellColors.Green: return CellColors.GreenBlue;
+                    case CellColors.Purple: return CellColors.PurpleBlue;
+                }
+                break;
+            case CellColors.Red:
+                switch (colorB)
+                {
+                    case CellColors.White: return CellColors.Red;
+                    case CellColors.Yellow: return CellColors.Orange;
+                    case CellColors.Blue: return CellColors.Purple;
+                    case CellColors.Purple: return CellColors.PurpleRed;
+                    case CellColors.Orange: return CellColors.OrangeRed;
+                }
+                break;
+            case CellColors.Green:
+                switch (colorB)
+                {
+                    case CellColors.Yellow: return CellColors.GreenYellow;
+                    case CellColors.Blue: return CellColors.GreenBlue;
+                    case CellColors.White: return CellColors.Green;
+                }
+                break;
+            case CellColors.Purple:
+                switch (colorB)
+                {
+                    case CellColors.Blue: return CellColors.PurpleBlue;
+                    case CellColors.Red: return CellColors.PurpleRed;
+                    case CellColors.White: return CellColors.Purple;
+                }
+                break;
+            case CellColors.Orange:
+                switch (colorB)
+                {
+                    case CellColors.Yellow: return CellColors.OrangeYellow;
+                    case CellColors.Red: return CellColors.OrangeRed;
+                    case CellColors.White: return CellColors.Orange;
+                }
+                break;
+        }
+        return CellColors.None;
+    }
 }

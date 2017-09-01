@@ -72,6 +72,7 @@ public class InGame : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+        print(GlobalVariables.getColor(GlobalVariables.CellColors.Green, GlobalVariables.CellColors.Blue));
 		if (bgm == null) {
 			bgm = bgm_go;
 			DontDestroyOnLoad (bgm);
