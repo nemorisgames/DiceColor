@@ -226,7 +226,8 @@ public class Dice : MonoBehaviour {
 	}
 
 	void OnTriggerStay(Collider c){
-		if (c.CompareTag ("Untagged") || c.CompareTag ("Sum") || c.CompareTag ("Substraction") || c.CompareTag ("Multiplication") || c.CompareTag ("Division")) {
+
+		/*if (c.CompareTag ("Untagged") || c.CompareTag ("Sum") || c.CompareTag ("Substraction") || c.CompareTag ("Multiplication") || c.CompareTag ("Division")) {
 			if (onMovement || calculated)
 				return;
 			//print (c.GetComponent<Cell> ().stateCell);
@@ -349,7 +350,7 @@ public class Dice : MonoBehaviour {
                     }
 				break;
 			}
-		}
+		}*/
 	}
 
 	void changeOperation(Operation op){
