@@ -6,22 +6,34 @@ public class Cell : MonoBehaviour {
 	TextMesh text;
 	public enum StateCell {Normal, Passed, EndCell};
 	public StateCell stateCell = StateCell.Normal;
-	public int number = 3;
+
+	public ColorReference.CellColor cellColor;
+
+	public int index = 3;
 	Color32 defaultColor;
 	public bool operation = false;
+	ColorReference colorReference;
 	// Use this for initialization
+	public bool operated = false;
+	public int raiseGroup = 0;
 	void Start () {
+		colorReference = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<ColorReference>();
 		text = transform.Find ("Text").GetComponent<TextMesh> ();
-		text.text = "" + number;
+		//text.text = "" + number;
 		changeState (stateCell);
 		defaultColor = GetComponent<Renderer> ().material.GetColor ("_EmissionColor");
+		GetComponent<Renderer>().material.SetColor("_EmissionColor",colorReference.GetColorByEnum(cellColor));
 	}
 
 	public void changeState(StateCell s){
 		switch (s) {
-		case StateCell.Passed: 
-			text.text = "-";
-			GetComponent<MeshRenderer> ().enabled = false;
+			case StateCell.Passed: 
+			//text.text = "-";
+			//GetComponent<MeshRenderer> ().enabled = false;
+			GetComponent<Renderer>().material.SetColor("_EmissionColor",Color.gray);
+			break;
+			case StateCell.Normal:
+			GetComponent<Renderer>().material.SetColor("_EmissionColor",colorReference.GetColorByEnum(cellColor));
 			break;
 		}
 		stateCell = s;
@@ -51,4 +63,5 @@ public class Cell : MonoBehaviour {
 	void Update () {
 		
 	}
+
 }

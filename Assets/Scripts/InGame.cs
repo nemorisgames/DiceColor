@@ -68,11 +68,16 @@ public class InGame : MonoBehaviour {
 	int tutorialIndex;
     public TweenAlpha hintMessage;
     int hintPressedNumber = 0;
+
+	public ColorReference colorReference;
     
+	public UILabel onFloor;
+	public UILabel targetColor;
 
 	// Use this for initialization
 	void Start () {
-        print(GlobalVariables.getColor(GlobalVariables.CellColors.Green, GlobalVariables.CellColors.Blue));
+        //print(GlobalVariables.getColor(GlobalVariables.CellColors.Green, GlobalVariables.CellColors.Blue));
+		raiseCells = new List<Cell>();
 		if (bgm == null) {
 			bgm = bgm_go;
 			DontDestroyOnLoad (bgm);
@@ -80,6 +85,7 @@ public class InGame : MonoBehaviour {
 		}/* else {
 			DestroyImmediate (bgm_go);
 		}*/
+		colorReference = GetComponent<ColorReference>();
         if (PlayerPrefs.GetInt("Mute") == 1)
             bgm.mute = true;
         else
@@ -107,15 +113,15 @@ public class InGame : MonoBehaviour {
         }
         audio = GetComponent<AudioSource>();
         print("timesDied " + timesDied);
-        if (timesDied >= 5)
-            StartCoroutine(lightPath(2));
+        //if (timesDied >= 5)
+        //    StartCoroutine(lightPath(2));
         //StartCoroutine (cellArray[1,2].GetComponent<Cell>().shine ());
         //StartCoroutine (lightPath (2));
         diceSize = dice.GetComponent<MeshRenderer>().bounds.size.y / 2;
         hintsAvailable = PlayerPrefs.GetInt("hints", 2);
         hintIndicator.text = "" + hintsAvailable;
 		showTutorial = nguiCam.cullingMask;
-        
+       
     }
 
     public void hintPressed()
@@ -199,6 +205,8 @@ public class InGame : MonoBehaviour {
 		hintScreen.SendMessage ("PlayReverse");
 		UnPause ();
 	}
+
+	List <Cell> raiseCells;
 
 	public void componerEscena(){
 		string completo = "";
@@ -298,9 +306,9 @@ public class InGame : MonoBehaviour {
 		string[] auxNumbers = completoNumbers.Split(new char[1]{'$'});
 		string[] infoNumbers = auxNumbers[0].Split(new char[1]{'|'});
 		string[] arregloNumbers = auxNumbers[1].Split(new char[1]{'|'});
-		dice.transform.Find ("TextUp").GetComponent<TextMesh> ().text = "" + int.Parse (infoNumbers[0]);
-		dice.transform.Find ("TextLeft").GetComponent<TextMesh> ().text = "" + int.Parse (infoNumbers[1]);
-		dice.transform.Find ("TextForward").GetComponent<TextMesh> ().text = "" + int.Parse (infoNumbers[2]);
+		//dice.transform.Find ("TextUp").GetComponent<TextMesh> ().text = "" + int.Parse (infoNumbers[0]);
+		//dice.transform.Find ("TextLeft").GetComponent<TextMesh> ().text = "" + int.Parse (infoNumbers[1]);
+		//dice.transform.Find ("TextForward").GetComponent<TextMesh> ().text = "" + int.Parse (infoNumbers[2]);
 		int indice = 0;
 		Transform rootCells = GameObject.Find ("Cells").transform;
 		cellArray = new GameObject[int.Parse(info[0]),int.Parse(info[1])];
@@ -308,6 +316,13 @@ public class InGame : MonoBehaviour {
 			for (int j = 0; j < int.Parse (info [1]); j++) {
 				GameObject g = null;
 				switch (int.Parse (arreglo [indice])) {
+				case -3:
+				case -4:
+					g = (GameObject)Instantiate (cellNormal, new Vector3 (j, -0.1f, -i) - posIni, Quaternion.identity);
+					g.transform.position = new Vector3(g.transform.position.x, g.transform.position.y - 10f, g.transform.position.z);
+					g.GetComponent<Cell>().raiseGroup = int.Parse (arreglo [indice]);
+					raiseCells.Add(g.GetComponent<Cell>());
+					break;
 				case -2:
 					g = (GameObject)Instantiate (cellEnd, new Vector3 (j, -0.1f, -i) - posIni, Quaternion.identity);
 					break;
@@ -341,7 +356,9 @@ public class InGame : MonoBehaviour {
 					break;
 				}
 				if (g != null) {
-					g.GetComponent<Cell> ().number = int.Parse (arregloNumbers [indice]);
+					//g.GetComponent<Cell> ().number = int.Parse (arregloNumbers [indice]);
+					g.GetComponent<Cell>().cellColor = colorReference.GetCellColorById(int.Parse (arregloNumbers [indice]));
+					g.GetComponent<Cell>().index = indice;
 					g.transform.parent = rootCells;
 					cellArray [i,j] = g;
 				}
@@ -425,7 +442,7 @@ public class InGame : MonoBehaviour {
 					yield return new WaitForSeconds (1f / 2);
 				}
 				foreach (Transform t in adjacentCells)
-					t.GetComponent<AdjacentCellFinder> ().active = true;
+					//t.GetComponent<AdjacentCellFinder> ().active = true;
                 StartCoroutine (cellArray [(int)((Vector2)path [0]).x, (int)((Vector2)path [0]).y].GetComponent<Cell> ().shine (2));
 				yield return new WaitForSeconds (1f);
 				break;
@@ -484,13 +501,13 @@ public class InGame : MonoBehaviour {
 		HideTutorial();
 		Pause ();
 		foreach (Transform t in adjacentCells)
-			t.GetComponent<AdjacentCellFinder> ().EnableCell (false);
+			//t.GetComponent<AdjacentCellFinder> ().EnableCell (false);
 		//for (int i = 0; i < tutorialClips.Length; i++)
 
 		StartCoroutine (dropCells ());
 		dice.enabled = false;
-		//finishedSign.SetActive (true);
-		//finishedSign.SendMessage ("PlayForward");
+		finishedSign.SetActive (true);
+		finishedSign.SendMessage ("PlayForward");
 		dice.enabled = false;
 		dice.transform.rotation = Quaternion.identity;
 		dice.GetComponent<Animator> ().SetTrigger ("Finished");
@@ -674,6 +691,11 @@ public class InGame : MonoBehaviour {
 			clockShow.text = (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds + "." + dec;
 		}
 
+
+		if(Input.GetKeyDown(KeyCode.V)){
+			StartCoroutine(raiseCellGroup(-3));
+		}
+
 		//test
 		if (testing) {
 			if (Input.GetKeyDown (KeyCode.Q)) {
@@ -693,15 +715,37 @@ public class InGame : MonoBehaviour {
 			}
 		}
 		if (rotating || pause || dice.onMovement) {
-			if (rotating)
-				foreach (Transform t in adjacentCells)
-					t.GetComponent<AdjacentCellFinder> ().EnableCell (false);
-			adjacentCells.gameObject.SetActive (false);
+			//if (rotating)
+				//foreach (Transform t in adjacentCells)
+					//t.GetComponent<AdjacentCellFinder> ().EnableCell (false);
+			//adjacentCells.gameObject.SetActive (false);
 		}
 		else if (!adjacentCells.gameObject.activeSelf && !finished)
-			adjacentCells.gameObject.SetActive (true);
+			//adjacentCells.gameObject.SetActive (true);
 				
 
 		adjacentCells.position = dice.transform.position;
+	}
+
+	IEnumerator raiseCellGroup(int i){
+		foreach(Cell c in raiseCells){
+			if(c.raiseGroup == i){
+				StartCoroutine(raiseCell(c));
+				yield return new WaitForSeconds(0.2f);
+			}
+		}
+	}
+
+	IEnumerator raiseCell(Cell c){
+		while(c.transform.position.y <= -0.3){
+			c.transform.position = new Vector3(c.transform.position.x, c.transform.position.y + 0.2f, c.transform.position.z);
+			yield return new WaitForSeconds(0.01f);
+		}
+	}
+
+	int cellRaiseIndex = -3;
+	public void NextRaiseGroup(){
+		StartCoroutine(raiseCellGroup(cellRaiseIndex));
+		cellRaiseIndex--;
 	}
 }

@@ -18,6 +18,16 @@ public static class GlobalVariables {
 	//8: CCW
 	//9: muerte
 
+
+	//new 
+	//2: red
+	//3: yellow
+	//4: blue
+	//5: orange
+	//7: green
+	//6: purple 
+
+
 	//10X: camino con un numero especifico (X)
 
 	//Stages
@@ -53,7 +63,7 @@ public static class GlobalVariables {
 	//1?
 
 	//filas|columnas|posxini|posyini|imgtut	  //0    1    2    3    4     
-	public static string Scene1 = "5|5|3|1|1$   9|   9|   9|   9|   9|" +
+	/*public static string Scene1 = "5|5|3|1|1$   9|   9|   9|   9|   9|" +
 											"   9|   1|   1|  -1|   9|" +
 											"   9|   1|   1|   1|   9|" +
 											"   9|  -2|   1|   1|   9|" +
@@ -66,8 +76,21 @@ public static class GlobalVariables {
 												"   0|   0|   5|   6|   0|" +
 												"   0|   0|   0|   0|   0|";
 
-	public static string Scene1Path = "1,2|2,2|3,2";
+	public static string Scene1Path = "1,2|2,2|3,2";*/
 
+	public static string Scene1 = "5|5|4|0|0$  -4|  -4|   1|   1|  -1|" +
+											"  -4|  -4|   1|   1|   1|" +
+											"  -4|  -3|  -3|   1|   1|" +
+											"  -4|  -3|  -3|  -3|  -4|" +
+											"  -4|  -3|  -3|  -3|  -4|";
+
+	public static string Scene1Numbers = "1|1|1$   20|  18|   3|   2|   0|" +
+												"  15|  12|   5|   4|   3|" +
+												"  10|   4|   2|   7|   4|" +
+												"  14|   2|   3|   7|   4|" +
+												"  21|  28|   5|  24|   6|";
+
+	public static string Scene1Path = "1,2|2,2|3,2";
 
 	//2
 

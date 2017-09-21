@@ -34,11 +34,11 @@ public class AdjacentCellFinder : MonoBehaviour {
 		if (c.name.Substring (0, 4) == "Cell" && active) {
 			previousID = cell.GetInstanceID ();
 			if (cell.stateCell == Cell.StateCell.Normal && !cell.operation) {
-				SwitchMaterial (cell, b);
+				//SwitchMaterial (cell, b);
 			}
 			if (b) {
 				if(previousCell != null && previousCell != cell)
-					SwitchMaterial (previousCell, !b);
+					//SwitchMaterial (previousCell, !b);
 				previousCell = cell;
 			}
 		}

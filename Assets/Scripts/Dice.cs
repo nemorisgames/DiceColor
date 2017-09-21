@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class Dice : MonoBehaviour {
 	[HideInInspector]
@@ -34,18 +35,30 @@ public class Dice : MonoBehaviour {
     bool dropped = false;
     // Use this for initialization
     bool swipe;
+
+	public ColorReference.CellColor diceColor;
+	public ColorReference.CellColor [] targetColor;
+	int targetIndex;
+
+	List<Direction> directions;
+
 	void Start () {
 		plane = GameObject.Find ("Plane").GetComponent<Transform> ();
 		line = GetComponent<LineRenderer> ();
 		currentPos = transform.position;
-		numbers.Add(transform.Find("TextUp").GetComponent<TextMesh>());
+		/*numbers.Add(transform.Find("TextUp").GetComponent<TextMesh>());
 		numbers.Add(transform.Find("TextDown").GetComponent<TextMesh>());
 		numbers.Add(transform.Find("TextLeft").GetComponent<TextMesh>());
 		numbers.Add(transform.Find("TextRight").GetComponent<TextMesh>());
 		numbers.Add(transform.Find("TextForward").GetComponent<TextMesh>());
-		numbers.Add(transform.Find("TextBackward").GetComponent<TextMesh>());
+		numbers.Add(transform.Find("TextBackward").GetComponent<TextMesh>());*/
 
-		currentNumbers = numbers;
+		//currentNumbers = numbers;
+
+		diceColor = ColorReference.CellColor.None;
+
+		directions = new List<Direction>();
+		cells = new List<Cell>();
 
 		inGame = Camera.main.GetComponent<InGame> ();
 		audio = GetComponent<AudioSource> ();
@@ -63,12 +76,17 @@ public class Dice : MonoBehaviour {
 		} else {
 			ToggleSwipe (false);
 		}
+		
+		targetIndex = 0;
+		onMovement = true;
 	}
 
 	IEnumerator applyRootMotion(){
 		yield return new WaitForSeconds (1.6f);
 		transform.rotation = Quaternion.identity;
 		GetComponent<Animator> ().applyRootMotion = true;
+		onFloor = true;
+		onMovement = false;
 	}
 
 	public IEnumerator turn(Direction d){
@@ -84,16 +102,16 @@ public class Dice : MonoBehaviour {
 			RaycastHit r;
 			if(Physics.Raycast(transform.position - Vector3.forward + Vector3.up, new Vector3(0f, -1f, 0f), out r, 5f,LayerMask.GetMask(new string[1]{"Cell"}))){
 				if (r.collider.GetComponent<Cell> ().stateCell == Cell.StateCell.Normal) {
-					print (r.collider.name);
-					((TextMesh)currentNumbers [5]).text = "" + inGame.checkOperationResult (int.Parse (((TextMesh)currentNumbers [4]).text), int.Parse (((TextMesh)currentNumbers [0]).text));
+					//print (r.collider.name);
+					//((TextMesh)currentNumbers [5]).text = "" + inGame.checkOperationResult (int.Parse (((TextMesh)currentNumbers [4]).text), int.Parse (((TextMesh)currentNumbers [0]).text));
 				}
 			}
 			break;
 		case Direction.Left:
 			if (Physics.Raycast (transform.position - Vector3.right + Vector3.up, new Vector3 (0f, -1f, 0f), out r, 5f,LayerMask.GetMask(new string[1]{"Cell"}))) {
 				if (r.collider.GetComponent<Cell> ().stateCell == Cell.StateCell.Normal) {
-					print (r.collider.name);
-					((TextMesh)currentNumbers [3]).text = "" + inGame.checkOperationResult (int.Parse (((TextMesh)currentNumbers [2]).text), int.Parse (((TextMesh)currentNumbers [0]).text));
+					//print (r.collider.name);
+					//((TextMesh)currentNumbers [3]).text = "" + inGame.checkOperationResult (int.Parse (((TextMesh)currentNumbers [2]).text), int.Parse (((TextMesh)currentNumbers [0]).text));
 				}
 			}
 			break;
@@ -129,7 +147,7 @@ public class Dice : MonoBehaviour {
 		}
 
 		//ordena las caras y las almacena
-		switch(d){
+		/*switch(d){
 		case Direction.Up:
 			TextMesh t = ((TextMesh)currentNumbers [5]);
 			currentNumbers [5] = currentNumbers [0];
@@ -158,10 +176,10 @@ public class Dice : MonoBehaviour {
 			currentNumbers [2] = currentNumbers [1];
 			currentNumbers [1] = t;
 			break;
-		}
+		}*/
 		//gira las caras
 		Transform pos;
-		switch(d){
+		/*switch(d){
 		case Direction.Up:
 			pos = ((TextMesh)currentNumbers [1]).transform;
 			((TextMesh)currentNumbers [1]).transform.RotateAround (pos.position, pos.forward, -90);
@@ -214,7 +232,7 @@ public class Dice : MonoBehaviour {
 				}
 			}
 			break;
-		}
+		}*/
 		lastDirection = d;
 		onMovement = false;
 		currentPos = transform.position;
@@ -225,10 +243,45 @@ public class Dice : MonoBehaviour {
 		hintTime = 10f;
 	}
 
+	Cell lastCell;
+
+	bool ReverseDirection(Direction d1, Direction d2){
+		if(d1 == d2)
+			return false;
+		else{
+			switch(d1){
+				case Direction.Left:
+				if(d2 == Direction.Right)
+					return true;
+				else
+					return false;
+				case Direction.Right:
+				if(d2 == Direction.Left)
+					return true;
+				else
+					return false;
+				case Direction.Up:
+				if(d2 == Direction.Down)
+					return true;
+				else
+					return false;
+				case Direction.Down:
+				if(d2 == Direction.Up)
+					return true;
+				else
+					return false;
+				default:
+					return true;
+			}
+		}
+	}
+	
+	List <Cell> cells;
+
 	void OnTriggerStay(Collider c){
 
-		/*if (c.CompareTag ("Untagged") || c.CompareTag ("Sum") || c.CompareTag ("Substraction") || c.CompareTag ("Multiplication") || c.CompareTag ("Division")) {
-			if (onMovement || calculated)
+		//if (/*c.CompareTag ("Untagged") || */c.CompareTag ("Sum") || c.CompareTag ("Substraction") || c.CompareTag ("Multiplication") || c.CompareTag ("Division")) {
+			/*if (onMovement || calculated)
 				return;
 			//print (c.GetComponent<Cell> ().stateCell);
 			//comprueba que el calculo este bien
@@ -332,7 +385,102 @@ public class Dice : MonoBehaviour {
 				inGame.finishGame ();
 			}
 			calculated = true;
-		} else {
+		 	*/
+		//} 
+		if(c.CompareTag("Untagged")){
+			if(onMovement || calculated)
+				return;
+
+			//obtener celda actual
+			Cell cell = c.GetComponent<Cell>();
+
+			//si no es el primer movimiento
+			if(directions.Count > 0){
+				//si direccion = reversa -> resta colores, pinta celdas del piso
+				if(ReverseDirection(lastDirection,directions.ElementAt(directions.Count-1))){
+					directions.RemoveAt(directions.Count-1);
+					cells.Remove(cells.Last());
+					
+					if(!cell.operated){
+						Debug.Log("Subst:"+lastCell.cellColor+"-"+diceColor);
+						diceColor = inGame.colorReference.GetSubstColorByEnum(diceColor,lastCell.cellColor);
+
+						if(lastCell.stateCell == Cell.StateCell.Normal){
+							lastCell.changeState(Cell.StateCell.Passed);
+						}
+						else if(lastCell.stateCell == Cell.StateCell.Passed){
+							lastCell.changeState(Cell.StateCell.Normal);
+						}
+					}
+					else if(lastCell.stateCell == Cell.StateCell.Passed && !lastCell.operated){
+						lastCell.changeState(Cell.StateCell.Normal);
+					}
+				}
+				//si direccion = adelante -> suma colores, borra celdas del piso
+				else{
+					directions.Add(lastDirection);
+					cells.Add(cell);
+
+					if(!cell.operated){
+						Debug.Log("sum: "+diceColor+"+"+cell.cellColor);
+						diceColor = inGame.colorReference.GetSumColorByEnum(diceColor,cell.cellColor);
+
+						if(cell.stateCell == Cell.StateCell.Normal){
+							cell.changeState(Cell.StateCell.Passed);
+						}
+						else if(cell.stateCell == Cell.StateCell.Passed){
+							cell.changeState(Cell.StateCell.Normal);
+						}
+					}
+				}
+
+				if(cell.cellColor == ColorReference.CellColor.None || cell.operated)
+					diceColor = ColorReference.CellColor.None;
+			}
+			else{
+				if(cell.cellColor != ColorReference.CellColor.None){
+					directions.Add(lastDirection);
+					cells.Add(cell);
+				}
+				if(!cell.operated){
+					if(cell.stateCell == Cell.StateCell.Normal){
+						cell.changeState(Cell.StateCell.Passed);
+					}
+					else if(cell.stateCell == Cell.StateCell.Passed){
+						cell.changeState(Cell.StateCell.Normal);
+					}
+					diceColor = cell.cellColor;
+				}
+			}
+
+			//imprimir stack  direcciones
+			string s = "";
+			foreach(Direction d in directions)
+				s += d+" ";
+			Debug.Log(s);
+
+			//calcular resultado
+			if(targetIndex < targetColor.Length && diceColor == targetColor[targetIndex] && diceColor == cell.cellColor){
+				cell.changeState(Cell.StateCell.Passed);
+				diceColor = ColorReference.CellColor.None;
+				targetIndex++;
+				if(targetIndex == targetColor.Length)
+					inGame.finishGame();
+				else{
+					directions.Clear();
+					foreach(Cell cc in cells)
+						cc.operated = true;
+					cells.Clear();
+					inGame.NextRaiseGroup();
+				}
+			}
+			lastCell = cell;
+			calculated = true;
+
+			GetComponent<Renderer>().material.SetColor("_Color",inGame.colorReference.GetColorByEnum(diceColor));
+			GetComponent<Renderer>().material.SetColor("_emissionColor",inGame.colorReference.GetColorByEnum(diceColor));
+		}
+		else {
 			switch (c.tag) {
 			case "Rotate90CW":
 				Destroy (c.gameObject);
@@ -343,15 +491,39 @@ public class Dice : MonoBehaviour {
 				StartCoroutine (inGame.rotateCells (false));
 				break;
 			case "Death":
-                    if (!dropped)
-                    {
-                        dropped = true;
-                        StartCoroutine(Drop());
-                    }
+				if (!dropped)
+				{
+					dropped = true;
+					StartCoroutine(Drop());
+				}
 				break;
 			}
-		}*/
+		}
+
+		if(diceColor == ColorReference.CellColor.Wrong){
+			inGame.badMove();
+		}
+
+		onFloor = true;
 	}
+
+	void OnTriggerExit(Collider c)
+	{
+		onFloor = false;
+		StartCoroutine(delayOnFloor(0.15f));
+	}
+
+	void OnTriggerEnter(Collider other)
+	{
+		onFloor = true;
+	}
+
+	IEnumerator delayOnFloor(float f){
+		yield return new WaitForSeconds(f);
+		if(!onFloor && !onMovement && !inGame.finished)
+			StartCoroutine(Drop());
+	}
+
 
 	void changeOperation(Operation op){
 		nextOperation = op;
@@ -384,6 +556,7 @@ public class Dice : MonoBehaviour {
 
 	Vector3 initialPosition;
 	float timeSwipe;
+	bool onFloor = true;
 
 	/*public void EnableAdjCells(){
 		foreach (Transform t in inGame.adjacentCells) {
@@ -393,16 +566,21 @@ public class Dice : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
+		
+		
+		inGame.targetColor.text = targetColor[targetIndex].ToString();
 		if (onMovement || inGame.rotating || Time.timeSinceLevelLoad < 2f || inGame.pause)
 			return;
-		if(timeLastMove <= Time.timeSinceLevelLoad - inGame.pauseTime - hintTime){
+		/*if(timeLastMove <= Time.timeSinceLevelLoad - inGame.pauseTime - hintTime){
 			StartCoroutine (inGame.lightPath (0));
 			hintTime += 5f;
+		}*/
+		if(!onMovement){
+			if (Input.GetKeyDown (KeyCode.W)) { StartCoroutine(turn (Direction.Up)); }
+			if (Input.GetKeyDown (KeyCode.S)) { StartCoroutine(turn (Direction.Down)); }
+			if (Input.GetKeyDown (KeyCode.A)) { StartCoroutine(turn (Direction.Left)); }
+			if (Input.GetKeyDown (KeyCode.D)) { StartCoroutine(turn (Direction.Right));}
 		}
-		if (Input.GetKeyDown (KeyCode.W)) { StartCoroutine(turn (Direction.Up)); }
-		if (Input.GetKeyDown (KeyCode.S)) { StartCoroutine(turn (Direction.Down)); }
-		if (Input.GetKeyDown (KeyCode.A)) { StartCoroutine(turn (Direction.Left)); }
-		if (Input.GetKeyDown (KeyCode.D)) { StartCoroutine(turn (Direction.Right));}
 
 		if (swipe) {
 			if (Input.GetMouseButtonDown (0)) {
@@ -429,6 +607,12 @@ public class Dice : MonoBehaviour {
 					}
 				}
 			}
+		}
+
+		if(onMovement)
+			inGame.onFloor.text = "";
+		else{
+			inGame.onFloor.text = onFloor.ToString();
 		}
 	}
 }
