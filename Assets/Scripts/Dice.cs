@@ -608,11 +608,5 @@ public class Dice : MonoBehaviour {
 				}
 			}
 		}
-
-		if(onMovement)
-			inGame.onFloor.text = "";
-		else{
-			inGame.onFloor.text = onFloor.ToString();
-		}
 	}
 }

@@ -71,7 +71,6 @@ public class InGame : MonoBehaviour {
 
 	public ColorReference colorReference;
     
-	public UILabel onFloor;
 	public UILabel targetColor;
 
 	// Use this for initialization
