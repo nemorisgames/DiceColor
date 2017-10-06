@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class ColorReference : MonoBehaviour {
 	public enum CellColor {Red,Yellow,Blue,Orange,Green,Purple,RedOra,YelOra,BluOra,RedGre,YelGre,BluGre,RedPur,YelPur,BluPur,Wrong,None};
@@ -172,5 +173,20 @@ public class ColorReference : MonoBehaviour {
 			return idToEnum[id];
 		else
 			return CellColor.Wrong;
+	}
+
+	public CellColor GetRandomColor(){
+		return GetCellColorById(randomColor());
+	}
+
+	public int randomColor(){
+		List <int> colors = new List<int>();
+		for(int i=2;i<25;i++){
+			if(idToEnum[i] != CellColor.Wrong)
+				colors.Add(i);
+		}
+		int r = Random.Range(0,colors.Count-1);
+		//Debug.Log(idToEnum[colors.ElementAt(r)]);
+		return colors.ElementAt(r);
 	}
 }

@@ -7,6 +7,7 @@ using UnityEngine.Analytics;
 using UnityEngine.Advertisements;
 
 using VoxelBusters.NativePlugins;
+using System.Linq;
 
 public class InGame : MonoBehaviour {
 	Dice dice;
@@ -73,7 +74,13 @@ public class InGame : MonoBehaviour {
     
 	public UILabel targetColor;
 
+	int cellIndex = 0;
+
 	// Use this for initialization
+
+	void Awake(){
+		colorReference = GetComponent<ColorReference>();
+	}
 	void Start () {
         //print(GlobalVariables.getColor(GlobalVariables.CellColors.Green, GlobalVariables.CellColors.Blue));
 		raiseCells = new List<Cell>();
@@ -84,7 +91,7 @@ public class InGame : MonoBehaviour {
 		}/* else {
 			DestroyImmediate (bgm_go);
 		}*/
-		colorReference = GetComponent<ColorReference>();
+		
         if (PlayerPrefs.GetInt("Mute") == 1)
             bgm.mute = true;
         else
@@ -120,7 +127,7 @@ public class InGame : MonoBehaviour {
         hintsAvailable = PlayerPrefs.GetInt("hints", 2);
         hintIndicator.text = "" + hintsAvailable;
 		showTutorial = nguiCam.cullingMask;
-       
+		passedCells = new List<Cell>();
     }
 
     public void hintPressed()
@@ -331,6 +338,7 @@ public class InGame : MonoBehaviour {
 				case 1:
 				case 2:
 					g = (GameObject)Instantiate (cellNormal, new Vector3 (j, -0.1f, -i) - posIni, Quaternion.identity);
+					cellIndex++;
 					break;
 				case 3:
 					g = (GameObject)Instantiate (cellSum, new Vector3 (j, -0.1f, -i) - posIni, Quaternion.identity);
@@ -607,6 +615,109 @@ public class InGame : MonoBehaviour {
 		}
 	}
 
+	public IEnumerator dropCells(List<Cell> cells){
+		//obtener "altura" bloque de celdas pasadas
+		int height = 0;
+		cells = cells.OrderBy(o=>o.transform.position.x).ToList();
+		List <float> aux = new List<float>();
+		foreach(Cell c in cells){
+			//Debug.Log(c.index);
+			if(!aux.Contains(c.transform.position.z)){
+				aux.Add(c.transform.position.z);
+			}
+			else
+				continue;
+		}
+		height = aux.Count;
+		//Obtener celda mas a la izquierda para cada altura => filas
+		List <Cell> cellAux = new List<Cell>();
+		for(int i=0;i<height;i++){
+			foreach(Cell c in cells){
+				if(c.transform.position.z == aux.ElementAt(i)){
+					cellAux.Add(c);
+					break;
+				}
+			}	
+		}
+		//Check si el numero de celdas obtenido es correcto
+		Debug.Log(height == cellAux.Count);
+		
+		//por cada fila
+		foreach(Cell c in cellAux){
+			float rnd = Random.Range (0.01f, 0.08f);
+			yield return new WaitForSeconds (rnd);
+			
+			List<Cell> row = new List<Cell>();
+			MoveCellsAtRight(row,c,0,0);
+
+			/*if(c.adjacentCells[2] != null){
+				List<Cell> row = new List<Cell>();
+				MoveCellsAtRight(row,c,1);
+
+			}*/
+		}
+
+		//Droppear celdas grises
+		foreach(Cell c in cells){
+			if(c.stateCell == Cell.StateCell.Passed){
+				Rigidbody rb = c.GetComponent<Rigidbody> ();
+				rb.isKinematic = false;
+				rb.useGravity = true;
+				StartCoroutine(disableCell(c));
+			}
+		}
+
+		passedCells.Clear();
+	}
+
+	void MoveCellsAtRight(List<Cell> row, Cell c, int dist, int replace){
+		dist++;
+		//si la celda está pasada, marcar un reemplazo
+		if(c.stateCell == Cell.StateCell.Passed){
+			replace++;
+		}
+
+		if(c.stateCell == Cell.StateCell.Normal){
+			//Debug.Log(c.index+" moved: "+dist);
+			StartCoroutine(moveCell(c.transform,replace));
+		}
+
+		row.Add(c);
+
+		//si la siguiente celda no es nula
+		if(c.adjacentCells[2] != null){
+			MoveCellsAtRight(row,c.adjacentCells[2],dist,replace);
+		}
+		else{
+			//Debug.Log("Replaced cells: "+replace);
+			for(int i=1;i<=replace;i++){
+				GameObject aux = (GameObject)Instantiate(cellNormal, new Vector3(c.transform.position.x + 0.5f + i, c.transform.position.y, c.transform.position.z) ,Quaternion.identity,c.transform.parent);
+				Cell cc = aux.GetComponent<Cell>();
+				cc.cellColor = colorReference.GetCellColorById(colorReference.randomColor());
+				cc.Recolor(cc.cellColor);
+				cellIndex++;
+				cc.index = cellIndex;
+				StartCoroutine(moveCell(cc.transform,replace + 0.5f + i - i));
+			}
+			return;
+		}
+	}
+
+	IEnumerator moveCell(Transform cell, float distance){
+		cell.GetComponent<Cell>().EnableCell(false);
+		Vector3 pos = cell.position;
+		float moveDist = 0.04f;
+		Vector3 target = new Vector3(pos.x - distance, pos.y, pos.z);
+		while(target.x < pos.x){
+			pos -= new Vector3(moveDist,0f,0f);
+			cell.position = pos;
+			yield return new WaitForSeconds(0.0001f);
+		}
+		cell.position = target;
+		cell.position = new Vector3(Mathf.Round(cell.position.x),cell.position.y, Mathf.Round(cell.position.z));
+		cell.GetComponent<Cell>().EnableCell(true);
+	}
+
 	IEnumerator disableCell(Cell c){
 		yield return new WaitForSeconds (2f);
 		c.gameObject.SetActive (false);
@@ -719,11 +830,11 @@ public class InGame : MonoBehaviour {
 					//t.GetComponent<AdjacentCellFinder> ().EnableCell (false);
 			//adjacentCells.gameObject.SetActive (false);
 		}
-		else if (!adjacentCells.gameObject.activeSelf && !finished)
+		//else if (!adjacentCells.gameObject.activeSelf && !finished)
 			//adjacentCells.gameObject.SetActive (true);
 				
 
-		adjacentCells.position = dice.transform.position;
+		//adjacentCells.position = dice.transform.position;
 	}
 
 	IEnumerator raiseCellGroup(int i){
@@ -746,5 +857,38 @@ public class InGame : MonoBehaviour {
 	public void NextRaiseGroup(){
 		StartCoroutine(raiseCellGroup(cellRaiseIndex));
 		cellRaiseIndex--;
+	}
+
+	public void MoveDiceTo(Vector3 pos, Cell c){
+		if(selectCell){
+			//menos de 3 adyacentes o celda gris -> no baja el dado
+			if(dice.getAdjacentCellCount(c) < 3 || c.stateCell == Cell.StateCell.Passed){
+				return;
+			}
+			//baja el dado
+			else{
+				dice.calculated = false;
+				rotateDice(pos);
+				dice.transform.position = new Vector3(pos.x,0.5f,pos.z);
+				dice.SetDiceColor(c.cellColor,false);
+				dice.onMovement = false;
+				selectCell = false;
+			}
+		}
+	}
+
+	public bool selectCell = false;
+	public List <Cell> passedCells;
+
+	void rotateDice(Vector3 pos){
+		int difX = (int)(pos.x - dice.transform.position.x);
+		int difZ = (int)(pos.z - dice.transform.position.z);
+		for(int i = 0;i<Mathf.Abs(difX);i++){
+			dice.transform.RotateAround (dice.transform.position, Vector3.forward, 90f*Mathf.Sign(difX));
+		}
+		for(int i = 0;i<Mathf.Abs(difZ);i++){
+			dice.transform.RotateAround (dice.transform.position, Vector3.right, 90f*Mathf.Sign(difZ));
+		}
+		
 	}
 }

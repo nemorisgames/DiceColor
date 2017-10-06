@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Cell : MonoBehaviour {
 	TextMesh text;
+	InGame inGame;
 	public enum StateCell {Normal, Passed, EndCell};
 	public StateCell stateCell = StateCell.Normal;
 
@@ -16,13 +17,31 @@ public class Cell : MonoBehaviour {
 	// Use this for initialization
 	public bool operated = false;
 	public int raiseGroup = 0;
-	void Start () {
+	public GameObject adjacentCellsGO;
+	AdjacentCellFinder [] adjacentCellFinders;
+	public Cell [] adjacentCells;
+	public bool active = false;
+	void Awake () {
+		inGame = Camera.main.GetComponent<InGame>();
 		colorReference = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<ColorReference>();
 		text = transform.Find ("Text").GetComponent<TextMesh> ();
 		//text.text = "" + number;
+		
+		adjacentCellFinders = adjacentCellsGO.GetComponentsInChildren<AdjacentCellFinder>();
+		adjacentCells = new Cell[4];
+		//GetAdjacentCells();
+	}
+
+	void Start(){
 		changeState (stateCell);
 		defaultColor = GetComponent<Renderer> ().material.GetColor ("_EmissionColor");
-		GetComponent<Renderer>().material.SetColor("_EmissionColor",colorReference.GetColorByEnum(cellColor));
+		Recolor(cellColor);
+		EnableCell(true);
+	}
+
+	public void Recolor(ColorReference.CellColor color){
+		GetComponent<Renderer>().material.SetColor("_EmissionColor",colorReference.GetColorByEnum(color));
+		//Debug.Log(color);
 	}
 
 	public void changeState(StateCell s){
@@ -64,4 +83,31 @@ public class Cell : MonoBehaviour {
 		
 	}
 
+	public void GetAdjacentCells(){
+		for(int i=0;i<adjacentCells.Length;i++){
+			if(adjacentCellFinders[i].cell != null)
+				adjacentCells[i] = adjacentCellFinders[i].cell;
+			else
+				adjacentCells[i] = null;
+		}
+	}
+
+	IEnumerator delayGetAdjacent(){
+		yield return new WaitForSeconds(0.1f);
+		GetAdjacentCells();
+	}
+
+	public void GoToCell(){
+		inGame.MoveDiceTo(transform.position, GetComponent<Cell>());
+	}
+
+	void OnMouseDown()
+	{
+		if(active)
+			GoToCell();
+	}
+
+	public void EnableCell(bool b){
+		active = b;
+	}
 }
