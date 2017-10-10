@@ -19,8 +19,13 @@ public class ColorReference : MonoBehaviour {
 	void Awake () {
 		currentColor = cellColor;
 		//material = GetComponent<Renderer>().material;
-		idToColor = new string[30];
-		idToEnum = new CellColor[30];
+		//old
+		//idToColor = new string[30];
+		//idToEnum = new CellColor[30];
+
+		//new
+		idToColor = new string[8];
+		idToEnum = new CellColor[8];
 		BuildIdToColorTable();
 		//PrintColor(Color.blue,Color.yellow);
 		//material.color = GetColor(GetColorId(cellColor));
@@ -63,7 +68,7 @@ public class ColorReference : MonoBehaviour {
 			return 7;
 			case CellColor.Purple:
 			return 6;
-			case CellColor.RedOra:
+			/*case CellColor.RedOra:
 			return 10;
 			case CellColor.YelOra:
 			return 15;
@@ -80,9 +85,10 @@ public class ColorReference : MonoBehaviour {
 			case CellColor.YelPur:
 			return 18;
 			case CellColor.BluPur:
-			return 24;
+			return 24;*/
 			case CellColor.Wrong:
-			return 29;
+			//return 29;
+			return 1;
 			case CellColor.None:
 			return 0;
 			default:
@@ -102,7 +108,7 @@ public class ColorReference : MonoBehaviour {
 		idToColor[5] = "#FF840000"; //orange
 		idToColor[7] = "#00FF0000"; //green
 		idToColor[6] = "#A700FF00"; //purple
-		idToColor[10] = "#FF450000"; //red+orange
+		/*idToColor[10] = "#FF450000"; //red+orange
 		idToColor[15] = "#FFAB0000"; //yellow+orange
 		idToColor[20] = "#74004F00"; //blue+orange
 		idToColor[14] = "#74270000"; //red+green
@@ -110,7 +116,7 @@ public class ColorReference : MonoBehaviour {
 		idToColor[28] = "#02FFC400"; //blue+green
 		idToColor[12] = "#FF00AC00"; //red+purple
 		idToColor[18] = "#A793A500"; //yellow+purple
-		idToColor[24] = "#7000F600"; //blue+purple
+		idToColor[24] = "#7000F600"; //blue+purple*/
 
 		idToEnum[0] = CellColor.None;
 		idToEnum[2] = CellColor.Red;
@@ -119,7 +125,7 @@ public class ColorReference : MonoBehaviour {
 		idToEnum[5] = CellColor.Orange;
 		idToEnum[7] = CellColor.Green;
 		idToEnum[6] = CellColor.Purple;
-		idToEnum[10] = CellColor.RedOra;
+		/*idToEnum[10] = CellColor.RedOra;
 		idToEnum[15] = CellColor.YelOra;
 		idToEnum[20] = CellColor.BluOra;
 		idToEnum[14] = CellColor.RedGre;
@@ -127,7 +133,7 @@ public class ColorReference : MonoBehaviour {
 		idToEnum[28] = CellColor.BluGre;
 		idToEnum[12] = CellColor.RedPur;
 		idToEnum[18] = CellColor.YelPur;
-		idToEnum[24] = CellColor.BluPur;
+		idToEnum[24] = CellColor.BluPur;*/
 	}
 
 	int AddColors(int c1, int c2){
@@ -179,13 +185,23 @@ public class ColorReference : MonoBehaviour {
 		return GetCellColorById(randomColor());
 	}
 
+	public int reRoll = 1;
+	int lastRnd = -1;
+
 	public int randomColor(){
 		List <int> colors = new List<int>();
-		for(int i=2;i<25;i++){
+		for(int i=2;i<idToColor.Length;i++){
 			if(idToEnum[i] != CellColor.Wrong)
 				colors.Add(i);
 		}
-		int r = Random.Range(0,colors.Count-1);
+		int r = Random.Range(0,colors.Count);
+		for(int i=0;i<reRoll;i++){
+			if(r == lastRnd)
+				r = Random.Range(0,colors.Count);
+			else
+				continue;
+		}
+		lastRnd = r;
 		//Debug.Log(idToEnum[colors.ElementAt(r)]);
 		return colors.ElementAt(r);
 	}

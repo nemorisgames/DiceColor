@@ -72,7 +72,10 @@ public class InGame : MonoBehaviour {
 
 	public ColorReference colorReference;
     
-	public UILabel targetColor;
+	public UILabel score;
+	public UILabel multiplier;
+
+	public NextColor nextColor;
 
 	int cellIndex = 0;
 

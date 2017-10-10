@@ -47,6 +47,10 @@ public class Dice : MonoBehaviour {
 
 	GameObject adjacentCellsGO;
 	AdjacentCellFinder [] adjacentCells;
+
+	bool firstMove = true;
+	int score = 0;
+	float multiplier = 1;
 	void Start () {
 		plane = GameObject.Find ("Plane").GetComponent<Transform> ();
 		line = GetComponent<LineRenderer> ();
@@ -91,18 +95,20 @@ public class Dice : MonoBehaviour {
 	}
 
 	void UpdateNextColor(){
-		nextColor = inGame.colorReference.GetRandomColor();
-		inGame.targetColor.text = "NEXT COLOR: "+nextColor;
-		inGame.targetColor.color = inGame.colorReference.GetColorByEnum(nextColor);
-		inGame.targetColor.alpha = 1;
+		//nextColor = inGame.colorReference.GetRandomColor();
+		nextColor = inGame.nextColor.Next();
+		//inGame.targetColor.text = "NEXT COLOR: "+nextColor;
+		//inGame.targetColor.color = inGame.colorReference.GetColorByEnum(nextColor);
+		//inGame.targetColor.alpha = 1;
 		//inGame.targetColor.color.a = 1;
 	}
 
 	void UpdateNextColor(ColorReference.CellColor color){
-		nextColor = color;
-		inGame.targetColor.text = "NEXT COLOR: "+nextColor;
-		inGame.targetColor.color = inGame.colorReference.GetColorByEnum(nextColor);
-		inGame.targetColor.alpha = 1;
+		//nextColor = color;
+		nextColor = inGame.nextColor.Next();
+		//inGame.targetColor.text = "NEXT COLOR: "+nextColor;
+		//inGame.targetColor.color = inGame.colorReference.GetColorByEnum(nextColor);
+		//inGame.targetColor.alpha = 1;
 	}
 
 	IEnumerator applyRootMotion(){
@@ -314,6 +320,29 @@ public class Dice : MonoBehaviour {
 
 	bool calculatingPassed = false;
 
+	public void UpdateScore(int points){
+		score += (int)(points * multiplier);
+		inGame.score.text = score.ToString();
+	}
+
+	public void UpdateMultiplier(float m){
+		if(m >= 0)
+			multiplier += m;
+		else
+			multiplier = 0.5f;
+		multiplier = (Mathf.Round(multiplier * 100f))/100f;
+		multiplier = Mathf.Clamp(multiplier,0,4);
+		inGame.multiplier.text = "x "+multiplier.ToString();
+		if(m == -1)
+			inGame.multiplier.text = "x 1";
+	}
+
+	void UpdateScoreMultiplier(int points){
+		
+	}
+
+	int cellValue = 10;
+
 	void OnTriggerStay(Collider c){
 		if(c.CompareTag("Untagged")){
 			if(onMovement || calculated)
@@ -322,9 +351,15 @@ public class Dice : MonoBehaviour {
 			//obtener celda actual
 			Cell cell = c.GetComponent<Cell>();
 
-			if(cell.stateCell == Cell.StateCell.Normal && diceColor != ColorReference.CellColor.None && cell.cellColor != diceColor && !calculatingPassed){
+			if(cell != null && cell.stateCell == Cell.StateCell.Normal && diceColor != ColorReference.CellColor.None && cell.cellColor != diceColor && !calculatingPassed){
 				inGame.badMove();
+				return;
 			}
+
+			/*if(firstMove && cell.stateCell == Cell.StateCell.Passed){
+				firstMove = false;
+				SetDiceColor(cell.cellColor,false);
+			}*/
 
 			if(cell != null && cell.stateCell == Cell.StateCell.Normal && !inGame.selectCell){
 				diceColor = cell.cellColor;
@@ -338,7 +373,7 @@ public class Dice : MonoBehaviour {
 				adjCellCount = cells.Count;
 				Debug.Log(adjCellCount);
 				
-				if(adjCellCount >= 3){
+				if(adjCellCount > 0){
 					calculatingPassed = true;
 					foreach(Cell c_ in cells){
 						if(c_ == cells.Last())
@@ -346,8 +381,20 @@ public class Dice : MonoBehaviour {
 						else
 							StartCoroutine(grayOutCell(c_,false));
 					}
-
-					SetDiceColor(nextColor,true);
+					if(firstMove){
+						SetDiceColor(nextColor,true);
+						firstMove = false;
+					}
+					else{
+						SetDiceColor(nextColor,true);
+						if(adjCellCount >= 3)
+							UpdateMultiplier(0.5f);
+						else if(adjCellCount > 1)
+							UpdateMultiplier(0.25f);
+						else
+							UpdateMultiplier(0);
+					}
+					UpdateScore((int)((adjCellCount * cellValue)*multiplier));
 				}
 
 				calculated = true;
@@ -541,6 +588,7 @@ public class Dice : MonoBehaviour {
 			transform.position = new Vector3(transform.position.x, transform.position.y + 3f, transform.position.z);
 			onMovement = true;
 			StartCoroutine(inGame.dropCells(inGame.passedCells));
+			UpdateMultiplier(-1);
 		}
 	}
 
