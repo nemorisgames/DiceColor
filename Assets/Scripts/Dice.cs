@@ -386,9 +386,10 @@ public class Dice : MonoBehaviour {
 						firstMove = false;
 					}
 					else{
-						SetDiceColor(nextColor,true);
-						if(adjCellCount >= 3)
+						if(adjCellCount >= 3){
+							SetDiceColor(nextColor,true);
 							UpdateMultiplier(0.5f);
+						}
 						else if(adjCellCount > 1)
 							UpdateMultiplier(0.25f);
 						else
@@ -585,11 +586,45 @@ public class Dice : MonoBehaviour {
 	{
 		if(!inGame.selectCell){
 			inGame.selectCell = true;
-			transform.position = new Vector3(transform.position.x, transform.position.y + 3f, transform.position.z);
+			transform.position = new Vector3(inGame.center.x, transform.position.y + 1.1f, inGame.center.y);
+			GetComponent<Renderer>().enabled = false;
+			//StartCoroutine(moveToward(ColorReference.CellColor.None, new Vector3(inGame.center.x, transform.position.y + 1.1f, inGame.center.y)));
 			onMovement = true;
 			StartCoroutine(inGame.dropCells(inGame.passedCells));
 			UpdateMultiplier(-1);
 		}
+	}
+
+	public IEnumerator moveToward(ColorReference.CellColor col, Vector3 target){
+		float move = 0.1f;
+		//direction = (int)Mathf.Sign(direction);
+		Vector3 pos = transform.position;
+		float posX = pos.x;
+		float posY = pos.y;
+		float posZ = pos.z;
+
+		if(col == ColorReference.CellColor.None){
+			onMovement = true;
+			StartCoroutine(inGame.dropCells(inGame.passedCells));
+			UpdateMultiplier(-1);
+		}
+
+		while(pos.y != target.y){
+			posX = Mathf.Lerp(pos.x, target.x, move);
+			posY = Mathf.Lerp(pos.y, target.y, move);
+			posZ = Mathf.Lerp(pos.z, target.z, move);
+			pos = new Vector3(posX, posY, posZ);
+			Debug.Log(pos);
+			transform.position = pos;
+			yield return new WaitForSeconds(move);
+		}
+		
+		if(col != ColorReference.CellColor.None){
+			SetDiceColor(col,false);
+			onMovement = false;
+			inGame.selectCell = false;
+		}
+		
 	}
 
 }

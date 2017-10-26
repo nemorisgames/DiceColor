@@ -216,6 +216,7 @@ public class InGame : MonoBehaviour {
 	}
 
 	List <Cell> raiseCells;
+	public Vector2 center;
 
 	public void componerEscena(){
 		string completo = "";
@@ -319,6 +320,7 @@ public class InGame : MonoBehaviour {
 		//dice.transform.Find ("TextLeft").GetComponent<TextMesh> ().text = "" + int.Parse (infoNumbers[1]);
 		//dice.transform.Find ("TextForward").GetComponent<TextMesh> ().text = "" + int.Parse (infoNumbers[2]);
 		int indice = 0;
+		center = new Vector2((int)(int.Parse(info[0])/2 - 3), (int)(int.Parse(info[1])/2 - 3));
 		Transform rootCells = GameObject.Find ("Cells").transform;
 		cellArray = new GameObject[int.Parse(info[0]),int.Parse(info[1])];
 		for(int i = 0; i < int.Parse(info[0]); i++){
@@ -652,12 +654,6 @@ public class InGame : MonoBehaviour {
 			
 			List<Cell> row = new List<Cell>();
 			MoveCellsAtRight(row,c,0,0);
-
-			/*if(c.adjacentCells[2] != null){
-				List<Cell> row = new List<Cell>();
-				MoveCellsAtRight(row,c,1);
-
-			}*/
 		}
 
 		//Droppear celdas grises
@@ -872,10 +868,12 @@ public class InGame : MonoBehaviour {
 			else{
 				dice.calculated = false;
 				rotateDice(pos);
+				//StartCoroutine(dice.moveToward(c.cellColor,new Vector3(pos.x,0.5f,pos.z)));
 				dice.transform.position = new Vector3(pos.x,0.5f,pos.z);
 				dice.SetDiceColor(c.cellColor,false);
 				dice.onMovement = false;
 				selectCell = false;
+				dice.GetComponent<Renderer>().enabled = true;
 			}
 		}
 	}

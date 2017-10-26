@@ -185,7 +185,7 @@ public class ColorReference : MonoBehaviour {
 		return GetCellColorById(randomColor());
 	}
 
-	public int reRoll = 1;
+	public int reRoll = 2;
 	int lastRnd = -1;
 
 	public int randomColor(){
@@ -196,7 +196,7 @@ public class ColorReference : MonoBehaviour {
 		}
 		int r = Random.Range(0,colors.Count);
 		for(int i=0;i<reRoll;i++){
-			if(r == lastRnd)
+			if(r != lastRnd)
 				r = Random.Range(0,colors.Count);
 			else
 				continue;
