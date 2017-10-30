@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Linq;
 
 public class Dice : MonoBehaviour {
-	[HideInInspector]
+//	[HideInInspector]
 	public bool onMovement = false;
 	[HideInInspector]
 	public bool calculated = false;
@@ -51,6 +51,7 @@ public class Dice : MonoBehaviour {
 	bool firstMove = true;
 	int score = 0;
 	float multiplier = 1;
+	public Collider currentCollider;
 	void Start () {
 		plane = GameObject.Find ("Plane").GetComponent<Transform> ();
 		line = GetComponent<LineRenderer> ();
@@ -356,10 +357,8 @@ public class Dice : MonoBehaviour {
 				return;
 			}
 
-			/*if(firstMove && cell.stateCell == Cell.StateCell.Passed){
-				firstMove = false;
-				SetDiceColor(cell.cellColor,false);
-			}*/
+			if(cell.stateCell == Cell.StateCell.Passed)
+				return;
 
 			if(cell != null && cell.stateCell == Cell.StateCell.Normal && !inGame.selectCell){
 				diceColor = cell.cellColor;
@@ -437,12 +436,8 @@ public class Dice : MonoBehaviour {
 			UpdateNextColor();
 	}
 
-
-
 	int adjCellCount = 0;
 	List <int> cellsSearched;
-
-
 
 	public int getAdjacentCellCount(Cell c){
 		adjCellCount = 0;
@@ -471,15 +466,19 @@ public class Dice : MonoBehaviour {
 	{	
 		if(c.GetComponent<Cell>() == null){
 			onFloor = false;
-			StartCoroutine(delayOnFloor(0.15f));
+			//StartCoroutine(delayOnFloor(0.15f));
 		}
+		if(currentCollider != null)
+			currentCollider = null;
 	}
 
 	void OnTriggerEnter(Collider other)
 	{
 		//Debug.Log(other.name);
-		if(other.GetComponent<Cell>() != null)
+		currentCollider = other;
+		if(other.GetComponent<Cell>() != null){
 			onFloor = true;
+		}
 	}
 
 	IEnumerator delayOnFloor(float f){
@@ -625,6 +624,12 @@ public class Dice : MonoBehaviour {
 			inGame.selectCell = false;
 		}
 		
+	}
+
+	void LateUpdate()
+	{
+		if(!onMovement && currentCollider.name.Length == 1 && !onFloor)
+			StartCoroutine(delayOnFloor(0.15f));
 	}
 
 }
