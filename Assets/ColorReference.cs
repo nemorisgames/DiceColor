@@ -185,6 +185,10 @@ public class ColorReference : MonoBehaviour {
 		return GetCellColorById(randomColor());
 	}
 
+	public CellColor GetRandomNextColor(CellColor color){
+		return GetCellColorById(randomNextColor(color));
+	}
+
 	public int reRoll = 2;
 	int lastRnd = -1;
 
@@ -201,6 +205,20 @@ public class ColorReference : MonoBehaviour {
 			else
 				continue;
 		}
+		lastRnd = r;
+		//Debug.Log(idToEnum[colors.ElementAt(r)]);
+		return colors.ElementAt(r);
+	}
+
+	public int randomNextColor(ColorReference.CellColor color){
+		List <int> colors = new List<int>();
+		for(int i=2;i<idToColor.Length;i++){
+			if(idToEnum[i] != CellColor.Wrong)
+				colors.Add(i);
+		}
+		int r = Random.Range(0,colors.Count);
+		while(r == lastRnd || idToEnum[r] == color)
+			r = Random.Range(0,colors.Count);
 		lastRnd = r;
 		//Debug.Log(idToEnum[colors.ElementAt(r)]);
 		return colors.ElementAt(r);

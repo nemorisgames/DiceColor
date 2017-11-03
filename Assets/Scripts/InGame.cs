@@ -10,7 +10,7 @@ using VoxelBusters.NativePlugins;
 using System.Linq;
 
 public class InGame : MonoBehaviour {
-	Dice dice;
+	public Dice dice;
 	Transform cells;
 	GameObject [,] cellArray;
 	public TextMesh [] cellsText;
@@ -220,7 +220,7 @@ public class InGame : MonoBehaviour {
 
 	public void componerEscena(){
 		string completo = "";
-		switch (PlayerPrefs.GetString ("scene", "Scene1")) {
+		switch (/*PlayerPrefs.GetString ("scene", "Scene1")*/"Scene1") {
 		case "Scene1":completo = GlobalVariables.Scene1;break;
 		case "Scene2":completo = GlobalVariables.Scene2;break;
 		case "Scene3":completo = GlobalVariables.Scene3;break;
@@ -705,12 +705,12 @@ public class InGame : MonoBehaviour {
 	IEnumerator moveCell(Transform cell, float distance){
 		cell.GetComponent<Cell>().EnableCell(false);
 		Vector3 pos = cell.position;
-		float moveDist = 0.04f;
+		float moveDist = 0.1f;
 		Vector3 target = new Vector3(pos.x - distance, pos.y, pos.z);
-		while(target.x < pos.x){
+		while(target.x < pos.x - moveDist){
 			pos -= new Vector3(moveDist,0f,0f);
 			cell.position = pos;
-			yield return new WaitForSeconds(0.0001f);
+			yield return new WaitForSeconds(Time.deltaTime);
 		}
 		cell.position = target;
 		cell.position = new Vector3(Mathf.Round(cell.position.x),cell.position.y, Mathf.Round(cell.position.z));

@@ -20,6 +20,7 @@ public class AdjacentCellFinder : MonoBehaviour {
 		}
 		else if(c.tag != "Direction" && c.GetComponent<Cell>() == null)
 			cell = null;
+
 	}
 
 	void SetParentCell(string n){

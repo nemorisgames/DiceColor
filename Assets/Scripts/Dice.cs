@@ -52,6 +52,7 @@ public class Dice : MonoBehaviour {
 	int score = 0;
 	float multiplier = 1;
 	public Collider currentCollider;
+	public int colorCount = 0;
 	void Start () {
 		plane = GameObject.Find ("Plane").GetComponent<Transform> ();
 		line = GetComponent<LineRenderer> ();
@@ -353,11 +354,12 @@ public class Dice : MonoBehaviour {
 			Cell cell = c.GetComponent<Cell>();
 
 			if(cell != null && cell.stateCell == Cell.StateCell.Normal && diceColor != ColorReference.CellColor.None && cell.cellColor != diceColor && !calculatingPassed){
-				inGame.badMove();
+				//inGame.badMove();
+				RaiseDice();
 				return;
 			}
 
-			if(cell.stateCell == Cell.StateCell.Passed)
+			if(cell != null && cell.stateCell == Cell.StateCell.Passed)
 				return;
 
 			if(cell != null && cell.stateCell == Cell.StateCell.Normal && !inGame.selectCell){
@@ -388,11 +390,20 @@ public class Dice : MonoBehaviour {
 						if(adjCellCount >= 3){
 							SetDiceColor(nextColor,true);
 							UpdateMultiplier(0.5f);
+							colorCount = 0;
 						}
-						else if(adjCellCount > 1)
-							UpdateMultiplier(0.25f);
-						else
-							UpdateMultiplier(0);
+						else if(adjCellCount >= 1){
+							colorCount += adjCellCount;
+							if(colorCount >= 3){
+								SetDiceColor(nextColor,true);
+								UpdateMultiplier(0.5f);
+								colorCount = 0;
+							}
+							if(adjCellCount > 1)
+								UpdateMultiplier(0.25f);
+							else
+								UpdateMultiplier(0);
+						}
 					}
 					UpdateScore((int)((adjCellCount * cellValue)*multiplier));
 				}
@@ -484,7 +495,8 @@ public class Dice : MonoBehaviour {
 	IEnumerator delayOnFloor(float f){
 		yield return new WaitForSeconds(f);
 		if(!onFloor && !onMovement && !inGame.finished)
-			StartCoroutine(Drop());
+			//StartCoroutine(Drop());
+			RaiseDice();
 	}
 
 
@@ -583,7 +595,12 @@ public class Dice : MonoBehaviour {
 	}
 	void OnMouseDown()
 	{
+		RaiseDice();
+	}
+
+	void RaiseDice(){
 		if(!inGame.selectCell){
+			colorCount = 0;
 			inGame.selectCell = true;
 			transform.position = new Vector3(inGame.center.x, transform.position.y + 1.1f, inGame.center.y);
 			GetComponent<Renderer>().enabled = false;
@@ -628,7 +645,7 @@ public class Dice : MonoBehaviour {
 
 	void LateUpdate()
 	{
-		if(!onMovement && currentCollider.name.Length == 1 && !onFloor)
+		if(!onMovement && currentCollider != null && currentCollider.name.Length == 1 && !onFloor)
 			StartCoroutine(delayOnFloor(0.15f));
 	}
 

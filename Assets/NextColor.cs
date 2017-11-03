@@ -19,7 +19,7 @@ public class NextColor : MonoBehaviour {
 		dice = GameObject.FindGameObjectWithTag("Dice").GetComponent<Dice>();
 		colorRef = new ColorReference.CellColor[3];
 		for(int i=0;i<3;i++){
-			ColorReference.CellColor rnd = inGame.colorReference.GetRandomColor();
+			ColorReference.CellColor rnd = inGame.colorReference.GetRandomNextColor(ColorReference.CellColor.None);
 			colorRef[i] = rnd;
 			InstanceColor(rnd,(transform.position.y - distance * i),false);
 		}
@@ -48,7 +48,7 @@ public class NextColor : MonoBehaviour {
 		foreach(Transform t in colors){
 			StartCoroutine(moveColorY(t,distance));
 		}
-		ColorReference.CellColor rnd = inGame.colorReference.GetRandomColor();
+		ColorReference.CellColor rnd = inGame.colorReference.GetRandomNextColor(inGame.dice.diceColor);
 		colorRef[0] = colorRef[1];
 		colorRef[1] = colorRef[2];
 		colorRef[2] = rnd;
@@ -61,9 +61,9 @@ public class NextColor : MonoBehaviour {
 		Vector3 target = new Vector3(pos.x, pos.y + dist, pos.z);
 		float moveDist = distance/10f;
 		while(pos.y < target.y){
-			pos += new Vector3(0f,moveDist,0f);
+			pos += new Vector3(0f,Time.deltaTime,0f);
 			t.position = pos;
-			yield return new WaitForSeconds(0.0001f);
+			yield return new WaitForSeconds(Time.deltaTime);
 		}
 		t.position = target;
 	}
